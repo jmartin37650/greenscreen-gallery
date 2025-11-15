@@ -14,6 +14,7 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [currentPage, setCurrentPage] = useState('gallery');
 
   const handleLogin = async () => {
     try {
@@ -92,13 +93,45 @@ function App() {
         </div>
       </div>
 
-      <div className="gallery">
-        <h2>Featured Designs</h2>
-        <div className="design-grid">
-          {designs.map((design, index) => (
-            <DesignCard key={index} design={design} />
-          ))}
-        </div>
+      <div className="main-container">
+        <aside className="side-ribbon">
+          <nav className="ribbon-nav">
+            <button
+              className={`ribbon-btn ${currentPage === 'profile' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('profile')}
+            >
+              My Profile
+            </button>
+            <button
+              className={`ribbon-btn ${currentPage === 'gallery' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('gallery')}
+            >
+              Background Gallery
+            </button>
+          </nav>
+        </aside>
+
+        {currentPage === 'gallery' && (
+          <div className="gallery">
+            <h2>Featured Designs</h2>
+            <div className="design-grid">
+              {designs.map((design, index) => (
+                <DesignCard key={index} design={design} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'profile' && (
+          <div className="profile-page">
+            <h2>My Profile</h2>
+            <div className="profile-content">
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>User ID:</strong> {user.uid}</p>
+              <p>Welcome to your profile page!</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

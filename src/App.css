@@ -1,8 +1,57 @@
+.main-container {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 100px);
+}
+
+.side-ribbon {
+  width: 200px;
+  background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
+  padding: 2rem 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  border-right: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+.ribbon-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.ribbon-btn {
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: white;
+  border: 2px solid rgba(0, 255, 204, 0.2);
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.ribbon-btn:hover {
+  background-color: rgba(0, 255, 204, 0.1);
+  border-color: rgba(0, 255, 204, 0.6);
+  transform: translateX(5px);
+}
+
+.ribbon-btn.active {
+  background: linear-gradient(135deg, #00ffcc, #00e6a1);
+  color: #000;
+  border-color: #00ffcc;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+}
+
 .gallery {
+  flex: 1;
   padding: 2rem;
   background-color: #121212;
   color: white;
   text-align: center;
+  overflow-y: auto;
 }
 
 .gallery h2 {
@@ -440,4 +489,38 @@
 
 .download-box a:hover {
   background-color: #00ddb3;
+}
+
+.profile-page {
+  flex: 1;
+  padding: 2rem;
+  background-color: #121212;
+  color: white;
+  overflow-y: auto;
+}
+
+.profile-page h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #00ffcc;
+}
+
+.profile-content {
+  background-color: #1e1e1e;
+  border: 2px solid rgba(0, 255, 204, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+}
+
+.profile-content p {
+  font-size: 1.1rem;
+  margin: 1rem 0;
+  line-height: 1.6;
+}
+
+.profile-content strong {
+  color: #00ffcc;
 }
