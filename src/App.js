@@ -43,42 +43,40 @@ const handleLogout = async () => {
   if (!user) {
     return (
       <div className="login-screen">
-        <h1>{isRegistering ? 'Register' : 'Login'} to Green Screen Gallery</h1>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={isRegistering ? handleRegister : handleLogin}>
-          {isRegistering ? 'Register' : 'Login'}
-        </button>
-        <p>
-          {isRegistering ? 'Already have an account?' : 'Need an account?'}{' '}
-          <button onClick={() => setIsRegistering(!isRegistering)}>
-            {isRegistering ? 'Login' : 'Register'}
-          </button>
-        </p>
-      </div>
+  <img src="/assets/logo.png" alt="Green Screen Gallery Logo" className="login-logo" />
+  <h1>{isRegistering ? 'Register' : 'Login'} to Green Screen Gallery</h1>
+  <input
+    type="email"
+    placeholder="Email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+  <input
+    type="password"
+    placeholder="Password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+  <button onClick={isRegistering ? handleRegister : handleLogin}>
+    {isRegistering ? 'Register' : 'Login'}
+  </button>
+  <p>
+    {isRegistering ? 'Already have an account?' : 'Need an account?'}{' '}
+    <button className="toggle-button" onClick={() => setIsRegistering(!isRegistering)}>
+      {isRegistering ? 'Login' : 'Register'}
+    </button>
+  </p>
+</div>
     );
   }
 
   return (
-    <div className="gallery">
-  <div className="gallery-header">
-    <h1>Welcome, {user.email}!</h1>
+   <div className="header">
+  <img src="/assets/logo.png" alt="Logo" className="header-logo" />
+  <h1 className="logo-text">Green Screen Gallery</h1>
+  <div className="user-controls">
+    <span className="welcome">Welcome, {user.email}</span>
     <button onClick={handleLogout}>Logout</button>
-  </div>
-  <div className="grid">
-    {designs.map((d) => (
-      <DesignCard key={d.id} design={d} />
-    ))}
   </div>
 </div>
   );
