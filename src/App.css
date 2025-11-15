@@ -1,38 +1,65 @@
-.App {
+.gallery {
   text-align: center;
+  font-family: sans-serif;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  width: 200px;
+  height: 300px; /* Add a fixed height */
+  box-sizing: border-box;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.card img {
+  width: 100%;
+  height: auto;
+}
+.login-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
+  font-family: sans-serif;
 }
-
-.App-link {
-  color: #61dafb;
+.login-screen input {
+  padding: 0.5rem;
+  margin: 1rem;
+  font-size: 1rem;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.login-screen button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.login-screen button {
+  margin: 0.5rem;
+}
+.login-screen p button {
+  background: none;
+  border: none;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem;
+}
+.gallery-header button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
 }
