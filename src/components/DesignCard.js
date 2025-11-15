@@ -1,7 +1,23 @@
 function DesignCard({ design }) {
   return (
     <div className="card">
-      <img src={design.thumbnail} alt={design.title} />
+      {/* Thumbnail with hover preview */}
+      <div className="thumbnail-wrapper">
+        <img
+          src={design.thumbnail}
+          alt={design.title}
+          className="thumbnail"
+        />
+        <div className="hover-preview">
+          <img
+            src={design['hover-image']}
+            alt={design.title}
+            className="preview-image"
+          />
+        </div>
+      </div>
+
+      {/* Title and download */}
       <h3>{design.title}</h3>
       <a href={design.file} download>
         <button>Download</button>
@@ -9,4 +25,5 @@ function DesignCard({ design }) {
     </div>
   );
 }
+
 export default DesignCard;

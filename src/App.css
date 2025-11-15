@@ -42,6 +42,48 @@
   height: auto;
 }
 
+.thumbnail-wrapper {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: visible;
+  border-radius: 8px;
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hover-preview {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.thumbnail-wrapper:hover .hover-preview {
+  opacity: 1;
+}
+
+.preview-image {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
 .login-screen {
   display: flex;
   flex-direction: column;

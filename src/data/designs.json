@@ -3,78 +3,91 @@
     "id": 1,
     "title": "Retro Grid",
     "thumbnail": "/assets/retro-grid.jpg",
+    "hover-image": "/assets/retro-grid.jpg",
     "file": "/assets/retro-grid.jpg"
   },
   {
     "id": 2,
     "title": "Neon Tunnel",
     "thumbnail": "/assets/neon-tunnel.jpg",
+    "hover-image": "/assets/neon-tunnel.jpg",
     "file": "/assets/neon-tunnel.jpg"
   },
  {
     "id": 3,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
    {
     "id": 3,
-    "title": "Mountain Oasis",
-    "thumbnail": "/assets/mountain-Oasis.jpg",
-    "file": "/assets/mountain-Oasis.jpg"
+    "title": "studio-apartment-metro",
+    "thumbnail": "/assets/studio-apartment-metro.jpg",
+    "hover-image": "/assets/studio-apartment-metro.jpg",
+    "file": "/assets/studio-apartment-metro.jpg"
   },
    {
     "id": 4,
     "title": "Office Space",
     "thumbnail": "/assets/office-space.jpg",
+    "hover-image": "/assets/office-space.jpg",
     "file": "/assets/office-space.jpg"
   },
    {
     "id": 5,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
    {
     "id": 6,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 7,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 8,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 9,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 10,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 11,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   },
   {
     "id": 12,
     "title": "Mountain Oasis",
     "thumbnail": "/assets/mountain-Oasis.jpg",
+    "hover-image": "/assets/mountain-Oasis.jpg",
     "file": "/assets/mountain-Oasis.jpg"
   }
 ]
