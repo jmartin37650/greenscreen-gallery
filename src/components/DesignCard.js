@@ -1,4 +1,14 @@
+import { useState } from 'react';
+
 function DesignCard({ design }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(design['hover-image']);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="card">
       {/* Thumbnail with hover preview */}
@@ -22,6 +32,20 @@ function DesignCard({ design }) {
       <a href={design.file} download>
         <button>Download</button>
       </a>
+
+      {/* Image link text box */}
+      <div className="image-link-container">
+        <input
+          type="text"
+          value={design['hover-image']}
+          readOnly
+          className="image-link-input"
+          placeholder="Image link"
+        />
+        <button className="copy-btn" onClick={handleCopyLink} title="Copy link">
+          Copy
+        </button>
+      </div>
     </div>
   );
 }
