@@ -124,13 +124,37 @@
 }
 
 .header {
-  position: relative;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  height: 100px;
   background: linear-gradient(to right, #1f1f1f, #3f3f3f);
   color: white;
+  height: 100px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  width: 60px;
+  height: auto;
+  margin-right: 1rem;
+}
+
+.logo-text {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.login-logo {
+  width: 300px !important;   /* ⬅️ Force it to be bigger */
+  height: auto !important;
+  display: block;
+  margin: 0 auto 2rem auto;
 }
 
 .logo-text {
@@ -299,4 +323,47 @@
 
 .user-controls button:hover {
   background-color: #e60000;
+}
+.download-box {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.download-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.download-box h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #00ffcc;
+}
+
+.download-box p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.download-box a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #00ffcc;
+  color: #000;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.download-box a:hover {
+  background-color: #00ddb3;
 }
