@@ -236,7 +236,7 @@ function App() {
   if (!user) {
     return (
       <div className="login-screen">
-        <img src="/assets/logo.png" alt="Konnect Logo" className="login-logo" />
+        <img src="/assets/konnect-logo.png" alt="Konnect Logo" className="login-logo" />
         <h1>{isRegistering ? 'Register' : 'Login'} to Konnect</h1>
         <p className="login-tagline">Today's Social Platform. Customize and Socialize. Be you!</p>
         <input
@@ -275,7 +275,7 @@ function App() {
     <div className="App">
       <div className="header">
         <div className="header-left">
-          <img src="/assets/logo.png" alt="Logo" className="header-logo" />
+          <img src="/assets/konnect-logo-nb.png" alt="Logo" className="header-logo" />
           <div className="header-branding">
             <h1 className="logo-text">Konnect</h1>
             <p className="logo-tagline">Today's Social Platform. Customize and Socialize. Be you!</p>

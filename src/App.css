@@ -361,7 +361,7 @@
 }
 
 .header-logo {
-  width: 80px; /* ⬅️ Increase this value to make it bigger */
+  width: 150px; /* ⬅️ Increase this value to make it bigger */
   height: auto;
   margin-right: 1rem;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
