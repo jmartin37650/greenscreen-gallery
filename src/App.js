@@ -4,8 +4,11 @@ import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebas
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged,   // NEW: keeps user state in sync
+  updateProfile         // NEW: lets you set displayName, photoURL, etc.
 } from 'firebase/auth';
+
 import designs from './data/designs.json';
 import DesignCard from './components/DesignCard';
 import './App.css';
@@ -275,7 +278,7 @@ function App() {
     <div className="App">
       <div className="header">
         <div className="header-left">
-          <img src="/assets/konnect-logo-nb.png" alt="Logo" className="header-logo" />
+          <img src="/assets/konnect-logo.png" alt="Logo" className="header-logo" />
           <div className="header-branding">
             <h1 className="logo-text">Konnect</h1>
             <p className="logo-tagline">Today's Social Platform. Customize and Socialize. Be you!</p>
