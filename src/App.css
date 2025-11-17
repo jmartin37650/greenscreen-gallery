@@ -1,3 +1,4 @@
+/* Centered Konnect word in header */
 .main-container {
   display: flex;
   flex: 1;
@@ -264,8 +265,9 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  position: relative;
   padding: 1.5rem 2rem;
   background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
   color: white;
@@ -289,18 +291,20 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  align-items: flex-start;
 }
 
 .logo-text {
   font-size: 2.5rem;
   font-weight: 900;
-  margin: 0;
+  margin: 0 auto;
   background: linear-gradient(135deg, #00ffcc, #00e6a1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .logo-tagline {
@@ -319,16 +323,14 @@
 }
 
 .logo-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0;
+  /* Remove absolute centering for .logo-text, handled by flexbox now */
 }
 
 .user-controls {
-  margin-left: auto;
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 1rem;

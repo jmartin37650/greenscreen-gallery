@@ -1,12 +1,6 @@
-import { useState } from 'react';
-
 function DesignCard({ design }) {
-  const [copied, setCopied] = useState(false);
-
   const handleCopyLink = () => {
     navigator.clipboard.writeText(design['hover-image']);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (

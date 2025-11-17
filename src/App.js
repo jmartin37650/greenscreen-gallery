@@ -4,9 +4,7 @@ import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebas
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,   // NEW: keeps user state in sync
-  updateProfile         // NEW: lets you set displayName, photoURL, etc.
+  signOut
 } from 'firebase/auth';
 
 import designs from './data/designs.json';
@@ -14,6 +12,23 @@ import DesignCard from './components/DesignCard';
 import './App.css';
 
 function App() {
+    // Mock friends list for demonstration
+    const [friends, setFriends] = useState([
+      { id: 1, name: 'Alice', messages: [] },
+      { id: 2, name: 'Bob', messages: [] },
+      { id: 3, name: 'Charlie', messages: [] },
+    ]);
+    const [messageInputs, setMessageInputs] = useState({});
+
+    // Handle sending a message to a friend
+    const handleSendMessage = (friendId) => {
+      const text = messageInputs[friendId]?.trim();
+      if (!text) return;
+      setFriends((prev) => prev.map(f =>
+        f.id === friendId ? { ...f, messages: [...f.messages, { from: user.email, text, time: new Date().toLocaleTimeString() }] } : f
+      ));
+      setMessageInputs((prev) => ({ ...prev, [friendId]: '' }));
+    };
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,6 +46,11 @@ function App() {
   const newVideoUrlRef = useRef(null);
   const newVideoFileRef = useRef(null);
   const newVideoAddToProfileRef = useRef(null);
+  const galleryVideoFileRef = useRef(null);
+  const [galleryVideoThumbnail, setGalleryVideoThumbnail] = useState('');
+  const [galleryVideoTitle, setGalleryVideoTitle] = useState('');
+  const [galleryVideoDescription, setGalleryVideoDescription] = useState('');
+  const [galleryVideoUrl, setGalleryVideoUrl] = useState('');
   const [profileTextColor, setProfileTextColor] = useState('#ffffff');
   const [profileFontUrl, setProfileFontUrl] = useState('');
   const [profileBorderColor, setProfileBorderColor] = useState('#00ffcc');
@@ -41,6 +61,9 @@ function App() {
   const [videos, setVideos] = useState([]);
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoThumbnail, setVideoThumbnail] = useState('');
+  const myProfileVideoFileRef = useRef(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [tempBgImage, setTempBgImage] = useState('');
   const [tempTextColor, setTempTextColor] = useState('#ffffff');
@@ -83,36 +106,7 @@ function App() {
     }
   }, [profileButtonColor, tempButtonColor, isEditingProfile]);
 
-  const handleSaveProfile = () => {
-    setProfileBgImage(tempBgImage);
-    setProfileTextColor(tempTextColor);
-    setProfileFontUrl(tempFontUrl);
-    setProfileBorderColor(tempBorderColor);
-    setProfileButtonColor(tempButtonColor);
-    setProfileDisplayPic(tempDisplayPic);
-    setProfileTheme(tempTheme);
-    setProfileLayout(tempLayout);
 
-    const payload = {
-      profileBgImage: tempBgImage,
-      profileTextColor: tempTextColor,
-      profileFontUrl: tempFontUrl,
-      profileBorderColor: tempBorderColor,
-      profileButtonColor: tempButtonColor,
-      profileDisplayPic: tempDisplayPic,
-      profileTheme: tempTheme,
-      profileLayout: tempLayout,
-      videos: videos,
-      uploadedVideos: uploadedVideos,
-    };
-    try {
-      localStorage.setItem('gsg_profile', JSON.stringify(payload));
-    } catch (err) {
-      console.warn('Failed to save profile settings', err);
-    }
-
-    setIsEditingProfile(false);
-  };
 
   const handleLogin = async () => {
     try {
@@ -156,6 +150,7 @@ function App() {
       setUploadProgress(0);
 
       let finalUrl = urlVal;
+      let thumbnail = galleryVideoThumbnail;
 
       if (!finalUrl && file) {
         const path = `videos/${user?.uid || 'guest'}/${Date.now()}_${file.name}`;
@@ -170,6 +165,43 @@ function App() {
           }, (err) => reject(err), () => resolve());
         });
         finalUrl = await getDownloadURL(storageRef(storage, path));
+
+        // Generate thumbnail from video if not provided
+        if (!thumbnail) {
+          try {
+            const video = document.createElement('video');
+            video.src = finalUrl;
+            video.crossOrigin = 'anonymous';
+            video.onloadedmetadata = () => {
+              video.currentTime = Math.min(1, video.duration / 2);
+            };
+            video.onseeked = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              canvas.getContext('2d')?.drawImage(video, 0, 0);
+              thumbnail = canvas.toDataURL('image/jpeg');
+            };
+          } catch (err) {
+            console.warn('Failed to generate thumbnail', err);
+          }
+        }
+      }
+
+      // Upload custom thumbnail if provided
+      if (thumbnail && thumbnail.startsWith('data:')) {
+        try {
+          const response = await fetch(thumbnail);
+          const blob = await response.blob();
+          const thumbPath = `thumbnails/${user?.uid || 'guest'}/${Date.now()}.jpg`;
+          const thumbRef = storageRef(storage, thumbPath);
+          await new Promise((resolve, reject) => {
+            uploadBytesResumable(thumbRef, blob).on('state_changed', null, (err) => reject(err), () => resolve());
+          });
+          thumbnail = await getDownloadURL(thumbRef);
+        } catch (err) {
+          console.warn('Failed to upload thumbnail', err);
+        }
       }
 
       setUploadProgress(100);
@@ -184,6 +216,7 @@ function App() {
         title,
         description: desc,
         url: finalUrl,
+        thumbnail,
         timestamp: new Date().toLocaleString(),
       };
 
@@ -211,6 +244,7 @@ function App() {
       if (newVideoDescRef.current) newVideoDescRef.current.value = '';
       if (newVideoUrlRef.current) newVideoUrlRef.current.value = '';
       if (newVideoFileRef.current) newVideoFileRef.current.value = '';
+      setGalleryVideoThumbnail('');
     } catch (err) {
       console.error('Upload failed', err);
       alert('Video upload failed. See console for details.');
@@ -280,7 +314,6 @@ function App() {
         <div className="header-left">
           <img src="/assets/konnect-logo.png" alt="Logo" className="header-logo" />
           <div className="header-branding">
-            <h1 className="logo-text">Konnect</h1>
             <p className="logo-tagline">Today's Social Platform. Customize and Socialize. Be you!</p>
           </div>
         </div>
@@ -298,6 +331,12 @@ function App() {
               onClick={() => setCurrentPage('profile')}
             >
               My Profile
+            </button>
+            <button
+              className={`ribbon-btn ${currentPage === 'socialize' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('socialize')}
+            >
+              Socialize
             </button>
             <button
               className={`ribbon-btn ${currentPage === 'videos' ? 'active' : ''}`}
@@ -322,21 +361,65 @@ function App() {
               <h3>Upload Your Video</h3>
               <div className="video-upload-form-gallery">
                 <div className="form-group">
-                  <label>Video Title:</label>
-                  <input ref={newVideoTitleRef} placeholder="Enter video title" className="modal-input" />
+                  <label htmlFor="galleryVideoTitle">Video Title:</label>
+                  <input
+                    id="galleryVideoTitle"
+                    type="text"
+                    value={galleryVideoTitle}
+                    onChange={(e) => setGalleryVideoTitle(e.target.value)}
+                    placeholder="Enter video title"
+                    className="modal-input"
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Description:</label>
-                  <textarea ref={newVideoDescRef} placeholder="Enter video description" rows={3} className="modal-input" />
+                  <label htmlFor="galleryVideoDesc">Description:</label>
+                  <textarea
+                    id="galleryVideoDesc"
+                    value={galleryVideoDescription}
+                    onChange={(e) => setGalleryVideoDescription(e.target.value)}
+                    placeholder="Enter video description"
+                    rows={3}
+                    className="modal-input"
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Video File (or URL):</label>
-                  <input ref={newVideoUrlRef} placeholder="Paste video URL (e.g. YouTube link)" className="modal-input" />
+                  <label htmlFor="galleryVideoUrl">Video URL:</label>
+                  <input
+                    id="galleryVideoUrl"
+                    type="text"
+                    value={galleryVideoUrl}
+                    onChange={(e) => setGalleryVideoUrl(e.target.value)}
+                    placeholder="Enter YouTube, Vimeo, or direct video link"
+                    className="modal-input"
+                  />
                   <div style={{ marginTop: '0.5rem' }}>
-                    <label style={{ color: '#aaa', fontSize: '0.9rem' }}>Or upload a file:</label>
-                    <input ref={newVideoFileRef} type="file" accept="video/*" />
+                    <label style={{ color: '#aaa', fontSize: '0.9rem' }}>Or upload a video file:</label>
+                    <input
+                      id="galleryVideoFile"
+                      ref={galleryVideoFileRef}
+                      type="file"
+                      accept="video/*"
+                    />
+                  </div>
+                  <div className="video-input-group">
+                    <label htmlFor="galleryVideoThumbnail">Custom Thumbnail (optional):</label>
+                    <input
+                      id="galleryVideoThumbnail"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (evt) => {
+                            setGalleryVideoThumbnail(evt.target?.result || '');
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
                   </div>
                   <div style={{ marginTop: '0.75rem' }}>
                     <label style={{ color: '#ccc', fontSize: '0.9rem' }}>
@@ -346,7 +429,124 @@ function App() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button onClick={handleUploadVideo} disabled={uploading}>
+                  <button 
+                    onClick={async () => {
+                      if (!galleryVideoTitle.trim()) {
+                        alert('Please enter a video title');
+                        return;
+                      }
+
+                      if (!galleryVideoUrl.trim() && !galleryVideoFileRef.current?.files?.[0]) {
+                        alert('Please provide either a video URL or upload a file');
+                        return;
+                      }
+
+                      try {
+                        setUploading(true);
+                        setUploadProgress(0);
+                        let finalUrl = galleryVideoUrl.trim();
+                        let thumbnail = galleryVideoThumbnail;
+
+                        // Upload video file if provided
+                        if (!finalUrl && galleryVideoFileRef.current?.files?.[0]) {
+                          const file = galleryVideoFileRef.current.files[0];
+                          const path = `videos/${user?.uid || 'guest'}/${Date.now()}_${file.name}`;
+                          const sRef = storageRef(storage, path);
+                          const uploadTask = uploadBytesResumable(sRef, file);
+                          
+                          await new Promise((resolve, reject) => {
+                            uploadTask.on('state_changed', (snapshot) => {
+                              if (snapshot.totalBytes) {
+                                setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+                              }
+                            }, (err) => reject(err), () => resolve());
+                          });
+                          finalUrl = await getDownloadURL(storageRef(storage, path));
+
+                          // Generate thumbnail from video if not provided
+                          if (!thumbnail) {
+                            try {
+                              const video = document.createElement('video');
+                              video.src = finalUrl;
+                              video.crossOrigin = 'anonymous';
+                              video.onloadedmetadata = () => {
+                                video.currentTime = Math.min(1, video.duration / 2);
+                              };
+                              video.onseeked = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                canvas.getContext('2d')?.drawImage(video, 0, 0);
+                                thumbnail = canvas.toDataURL('image/jpeg');
+                              };
+                            } catch (err) {
+                              console.warn('Failed to generate thumbnail', err);
+                            }
+                          }
+                        }
+
+                        // Upload custom thumbnail if provided
+                        if (thumbnail && thumbnail.startsWith('data:')) {
+                          try {
+                            const response = await fetch(thumbnail);
+                            const blob = await response.blob();
+                            const thumbPath = `thumbnails/${user?.uid || 'guest'}/${Date.now()}.jpg`;
+                            const thumbRef = storageRef(storage, thumbPath);
+                            await new Promise((resolve, reject) => {
+                              uploadBytesResumable(thumbRef, blob).on('state_changed', null, (err) => reject(err), () => resolve());
+                            });
+                            thumbnail = await getDownloadURL(thumbRef);
+                          } catch (err) {
+                            console.warn('Failed to upload thumbnail', err);
+                          }
+                        }
+
+                        const newVideo = {
+                          id: Date.now(),
+                          title: galleryVideoTitle,
+                          description: galleryVideoDescription,
+                          url: finalUrl,
+                          thumbnail: thumbnail,
+                          timestamp: new Date().toLocaleString(),
+                        };
+
+                        const newUploaded = [newVideo, ...uploadedVideos];
+                        setUploadedVideos(newUploaded);
+
+                        let newProfileVideos = videos;
+                        if (newVideoAddToProfileRef.current?.checked) {
+                          newProfileVideos = [newVideo, ...videos];
+                          setVideos(newProfileVideos);
+                        }
+
+                        // Persist to localStorage
+                        try {
+                          const raw = localStorage.getItem('gsg_profile');
+                          const s = raw ? JSON.parse(raw) : {};
+                          s.uploadedVideos = newUploaded;
+                          s.videos = newProfileVideos;
+                          localStorage.setItem('gsg_profile', JSON.stringify(s));
+                        } catch (err) {
+                          console.warn('Failed to persist video', err);
+                        }
+
+                        // Clear inputs
+                        setGalleryVideoTitle('');
+                        setGalleryVideoDescription('');
+                        setGalleryVideoUrl('');
+                        setGalleryVideoThumbnail('');
+                        if (galleryVideoFileRef.current) galleryVideoFileRef.current.value = '';
+                        setUploadProgress(0);
+                        alert('Video uploaded successfully!');
+                      } catch (err) {
+                        console.error('Failed to upload video', err);
+                        alert('Failed to upload video. See console for details.');
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                    disabled={uploading}
+                  >
                     {uploading ? 'Uploading...' : 'Upload'}
                   </button>
                   {uploading && (
@@ -366,9 +566,17 @@ function App() {
                     <div
                       className="video-thumbnail-large"
                       onClick={() => setSelectedVideo(video)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ 
+                        backgroundImage: video.thumbnail ? `url(${video.thumbnail})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
                     >
-                      <div className="play-icon">▶️</div>
+                      {!video.thumbnail && <div className="play-icon">▶️</div>}
                     </div>
                     <div className="video-info">
                       <h4>{video.title}</h4>
@@ -486,9 +694,7 @@ function App() {
             data-theme={profileTheme}
           >
             <h2>My Profile</h2>
-            <div 
-              className="profile-content"
-            >
+            <div className="profile-content">
               {profileDisplayPic && (
                 <div className="profile-display-pic">
                   <img src={profileDisplayPic} alt="Profile" />
@@ -496,14 +702,16 @@ function App() {
               )}
               <div className="profile-info" style={{ color: profileTextColor, fontFamily: profileFontUrl || 'inherit' }}>
                 <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>User ID:</strong> {user.uid}</p>
+                <p><strong>User ID:</strong> {user.uid.slice(0, 6)}...{user.uid.slice(-4)}</p>
                 <p>Welcome to your profile page!</p>
+                <button style={{marginTop: '1rem', background: 'linear-gradient(135deg, #00ffcc, #00e6a1)', color: '#000', border: 'none', borderRadius: '6px', padding: '0.5rem 1.5rem', fontWeight: 'bold', cursor: 'pointer'}}>
+                  Friend Request
+                </button>
               </div>
 
-              {/* Video Uploads Section */}
+              {/* Video Upload Section */}
               <div className="video-uploads-section">
-                <h3>📹 Video Uploads</h3>
-                
+                <h3>📤 Upload a Video to Your Profile</h3>
                 <div className="video-upload-form">
                   <div className="video-input-group">
                     <label htmlFor="videoTitle">Video Title:</label>
@@ -515,7 +723,6 @@ function App() {
                       placeholder="Enter video title"
                     />
                   </div>
-                  
                   <div className="video-input-group">
                     <label htmlFor="videoDesc">Description:</label>
                     <textarea
@@ -526,32 +733,174 @@ function App() {
                       rows="3"
                     />
                   </div>
-
+                  <div className="video-input-group">
+                    <label htmlFor="videoUrl">Video URL:</label>
+                    <input
+                      id="videoUrl"
+                      type="text"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="Enter YouTube, Vimeo, or direct video link"
+                    />
+                  </div>
+                  <div className="video-input-group">
+                    <label htmlFor="myProfileVideoFile">Or upload a video file:</label>
+                    <input
+                      id="myProfileVideoFile"
+                      ref={myProfileVideoFileRef}
+                      type="file"
+                      accept="video/*"
+                    />
+                  </div>
+                  <div className="video-input-group">
+                    <label htmlFor="myProfileVideoThumbnail">Custom Thumbnail (optional):</label>
+                    <input
+                      id="myProfileVideoThumbnail"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (evt) => {
+                            setVideoThumbnail(evt.target?.result || '');
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
                   <button
                     className="video-upload-btn"
-                    onClick={() => {
-                      if (videoTitle.trim()) {
+                    onClick={async () => {
+                      if (!videoTitle.trim()) {
+                        alert('Please enter a video title');
+                        return;
+                      }
+                      if (!videoUrl.trim() && !myProfileVideoFileRef.current?.files?.[0]) {
+                        alert('Please provide either a video URL or upload a file');
+                        return;
+                      }
+                      try {
+                        setUploading(true);
+                        let finalUrl = videoUrl.trim();
+                        let thumbnail = videoThumbnail;
+                        // Upload video file if provided
+                        if (!finalUrl && myProfileVideoFileRef.current?.files?.[0]) {
+                          const file = myProfileVideoFileRef.current.files[0];
+                          const path = `videos/${user?.uid || 'guest'}/${Date.now()}_${file.name}`;
+                          const sRef = storageRef(storage, path);
+                          const uploadTask = uploadBytesResumable(sRef, file);
+                          await new Promise((resolve, reject) => {
+                            uploadTask.on('state_changed', (snapshot) => {
+                              if (snapshot.totalBytes) {
+                                setUploadProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+                              }
+                            }, (err) => reject(err), () => resolve());
+                          });
+                          finalUrl = await getDownloadURL(storageRef(storage, path));
+                          // Generate thumbnail from video if not provided
+                          if (!thumbnail) {
+                            try {
+                              const video = document.createElement('video');
+                              video.src = finalUrl;
+                              video.crossOrigin = 'anonymous';
+                              video.onloadedmetadata = () => {
+                                video.currentTime = Math.min(1, video.duration / 2);
+                              };
+                              video.onseeked = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = video.videoWidth;
+                                canvas.height = video.videoHeight;
+                                canvas.getContext('2d')?.drawImage(video, 0, 0);
+                                thumbnail = canvas.toDataURL('image/jpeg');
+                              };
+                            } catch (err) {
+                              console.warn('Failed to generate thumbnail', err);
+                            }
+                          }
+                        }
+                        // Upload custom thumbnail if provided
+                        if (thumbnail && thumbnail.startsWith('data:')) {
+                          try {
+                            const response = await fetch(thumbnail);
+                            const blob = await response.blob();
+                            const thumbPath = `thumbnails/${user?.uid || 'guest'}/${Date.now()}.jpg`;
+                            const thumbRef = storageRef(storage, thumbPath);
+                            await new Promise((resolve, reject) => {
+                              uploadBytesResumable(thumbRef, blob).on('state_changed', null, (err) => reject(err), () => resolve());
+                            });
+                            thumbnail = await getDownloadURL(thumbRef);
+                          } catch (err) {
+                            console.warn('Failed to upload thumbnail', err);
+                          }
+                        }
                         const newVideo = {
                           id: Date.now(),
                           title: videoTitle,
                           description: videoDescription,
+                          url: finalUrl,
+                          thumbnail: thumbnail,
                           timestamp: new Date().toLocaleString(),
                         };
                         setVideos([newVideo, ...videos]);
+                        setUploadedVideos([newVideo, ...uploadedVideos]);
+                        // Persist to localStorage
+                        try {
+                          const raw = localStorage.getItem('gsg_profile');
+                          const s = raw ? JSON.parse(raw) : {};
+                          s.videos = [newVideo, ...videos];
+                          s.uploadedVideos = [newVideo, ...uploadedVideos];
+                          localStorage.setItem('gsg_profile', JSON.stringify(s));
+                        } catch (err) {
+                          console.warn('Failed to persist video', err);
+                        }
+                        // Clear inputs
                         setVideoTitle('');
                         setVideoDescription('');
+                        setVideoUrl('');
+                        setVideoThumbnail('');
+                        if (myProfileVideoFileRef.current) myProfileVideoFileRef.current.value = '';
+                        setUploadProgress(0);
+                        alert('Video added successfully!');
+                      } catch (err) {
+                        console.error('Failed to add video', err);
+                        alert('Failed to add video. See console for details.');
+                      } finally {
+                        setUploading(false);
                       }
                     }}
                   >
-                    Add Video
+                    {uploading ? 'Uploading...' : 'Add Video'}
                   </button>
+                  {uploading && (
+                    <div style={{ width: '160px', height: '12px', background: '#eee', borderRadius: '6px', overflow: 'hidden', marginTop: '0.5rem' }}>
+                      <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'linear-gradient(90deg,#4caf50,#81c784)' }} />
+                    </div>
+                  )}
                 </div>
+              </div>
 
+              {/* My Videos Section */}
+              <div className="video-uploads-section">
+                <h3>🎬 My Videos</h3>
                 {videos.length > 0 ? (
                   <div className="videos-list">
                     {videos.map((video) => (
                       <div key={video.id} className="video-card">
-                        <div className="video-thumbnail">▶️</div>
+                        <div 
+                          className="video-thumbnail"
+                          style={{
+                            backgroundImage: video.thumbnail ? `url(${video.thumbnail})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {!video.thumbnail && '▶️'}
+                        </div>
                         <div className="video-card-info">
                           <div className="video-card-title">{video.title}</div>
                           <div className="video-card-desc">{video.description}</div>
@@ -585,7 +934,7 @@ function App() {
                   <div className="no-videos">No videos uploaded yet. Add one to get started!</div>
                 )}
               </div>
-              
+
               <button 
                 className="edit-btn" 
                 style={{ background: `linear-gradient(135deg, ${profileButtonColor}, ${profileButtonColor}dd)` }}
@@ -600,6 +949,68 @@ function App() {
                 setTempLayout(profileLayout);
                 setIsEditingProfile(true);
               }}>Edit Profile</button>
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'socialize' && (
+          <div className="gallery socialize-tab">
+            <h2>🤝 Socialize</h2>
+            <div className="socialize-section">
+              {/* Search Section */}
+              <div className="socialize-search" style={{ marginBottom: '2rem' }}>
+                <input
+                  type="text"
+                  placeholder="Search users or friends..."
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #00ffcc', background: '#181818', color: '#fff', fontSize: '1rem' }}
+                />
+              </div>
+              {/* Friends Section */}
+              <div className="socialize-friends">
+                <h3 style={{ color: '#00ffcc', marginBottom: '1rem' }}>Your Friends</h3>
+                {friends.length === 0 ? (
+                  <div style={{ color: '#aaa', fontStyle: 'italic' }}>
+                    (No friends yet)
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    {friends.map(friend => (
+                      <div key={friend.id} style={{ background: '#181818', borderRadius: '8px', padding: '1rem', border: '1px solid #222' }}>
+                        <div style={{ fontWeight: 'bold', color: '#00ffcc', marginBottom: '0.5rem' }}>{friend.name}</div>
+                        <div style={{ minHeight: '32px', marginBottom: '0.5rem' }}>
+                          {friend.messages.length === 0 ? (
+                            <span style={{ color: '#aaa', fontStyle: 'italic' }}>(No messages yet)</span>
+                          ) : (
+                            <div style={{ maxHeight: '80px', overflowY: 'auto', fontSize: '0.95rem' }}>
+                              {friend.messages.map((msg, idx) => (
+                                <div key={idx} style={{ marginBottom: '0.25rem', color: msg.from === user.email ? '#00e6a1' : '#fff' }}>
+                                  <span style={{ fontWeight: 'bold' }}>{msg.from === user.email ? 'You' : friend.name}:</span> {msg.text}
+                                  <span style={{ fontSize: '0.8em', color: '#888', marginLeft: '0.5em' }}>{msg.time}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input
+                            type="text"
+                            placeholder={`Message ${friend.name}...`}
+                            value={messageInputs[friend.id] || ''}
+                            onChange={e => setMessageInputs(inputs => ({ ...inputs, [friend.id]: e.target.value }))}
+                            style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #00ffcc', background: '#222', color: '#fff' }}
+                          />
+                          <button
+                            onClick={() => handleSendMessage(friend.id)}
+                            style={{ background: 'linear-gradient(135deg, #00ffcc, #00e6a1)', color: '#000', border: 'none', borderRadius: '6px', padding: '0.5rem 1rem', fontWeight: 'bold', cursor: 'pointer' }}
+                          >
+                            Send
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
