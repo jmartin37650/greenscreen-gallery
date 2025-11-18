@@ -6,7 +6,7 @@ import { getStorage } from 'firebase/storage';
 // ✅ Then your config and setup
 const firebaseConfig = {
   apiKey: "AIzaSyBYeiOgnd3p6yre5-0YhuCVOho9F06cQbg",
-  authDomain: "appv1-729f7.firebaseapp.com",
+  authDomain: "https://konnect.static.domains/Konnect.html",
   projectId: "appv1-729f7",
   storageBucket: "appv1-729f7.firebasestorage.app",
   messagingSenderId: "540046339276",
